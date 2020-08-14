@@ -1,0 +1,135 @@
+﻿@model PageModel
+@{
+    ViewData["Title"] = "Event";
+
+}
+
+<div ng-app="myApp" ng-controller="eventController" ng-init="init(@Model.ToJson())">
+    <div class="d-inline ">
+        <span ng-hide="item.id > 0" class="h1">New Event</span>
+        <span ng-show="item.id > 0" class="h1">{{item.name}}</span>
+        @*<button class="float-right" ng-click="save()">Save</button>*@
+    </div>
+    <div class="mt-5">
+        <form ng-submit="save()" name="eventForm" novalidate>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label>Event Type</label>
+                    <select class="form-control" name="type" ng-model="item.typeID" ng-options="+(opt.ID) as opt.Name for opt in selects.types " required>
+                        <option value="">[Select]</option>
+                    </select>
+                    <p class="error-msg" ng-if="eventForm.position.$error.required && eventForm.position.$touched">The event's type is required</p>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>Contact Name</label>
+                    <select class="form-control" name="contact" ng-model="item.contactID" ng-options="+(opt.ID) as opt.Name for opt in selects.contacts" required>
+                        <option value="">[Select]</option>
+                    </select>
+                    <p class="error-msg" ng-if="eventForm.contact.$error.required && eventForm.contact.$touched">The event's contact is required</p>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label>From Date</label>
+                    @*<div flex-gt-xs>
+
+                        <md-datepicker ng-model-options="item.startDate" ng-model="item.startDate" md-placeholder="Enter date"></md-datepicker>
+                    </div>*@
+                    @*<input type="date" ng-model="item.startDate" id="date-picker-example" class="form-control datepicker">*@
+
+                    <div>
+            <md-datepicker ng-model="from" md-placeholder="Enter date"></md-datepicker>
+        </div>
+                    <p class="error-msg" ng-if="eventForm.startDate.$error.pattern">The event's start date is required</p>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>To Date</label>
+                    <div>
+                        <md-datepicker ng-model="item.endDate" md-placeholder="Enter date"></md-datepicker>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label>For User</label>
+                    <select class="form-control" name="user" ng-model="item.forUserID" ng-options="+(opt.ID) as opt.Name for opt in selects.users " required>
+                        <option value="">[Select]</option>
+                    </select>
+                    <p class="error-msg" ng-if="eventForm.user.$error.required && eventForm.user.$touched">The event's user is required</p>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>For Date</label>
+                    <div>
+                        <md-datepicker ng-model="item.forCareDate" md-placeholder="Enter date"></md-datepicker>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    <label>Remarks</label>
+                    <textarea ng-model="item.remarks" class="form-control"></textarea>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    <label>Upload file</label>
+                    <input type="file" ng-model="item.fileName" class="form-control"/>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary" ng-disabled="eventForm.$invalid">Save</button>
+        </form>
+
+    </div>
+
+
+</div>
+
+<script>
+
+    var app = angular.module('myApp', ['ngMaterial', 'ngMessages']);
+    app.controller('eventController', function ($scope, $http) {
+        vm = $scope;
+        var custID;
+        vm.from = new Date();
+        vm.init = function (opts) {
+            console.log(opts);
+            vm.selects = opts.Selects;
+            if (opts.Temp !== null)
+                custID = opts.Temp;
+            $http.get('/events/' + opts.Item)
+                .then(function (response) {
+                    vm.item = response.data;
+                    vm.item.contactID = vm.item.contactID || null;
+                    vm.item.forUserID = vm.item.forUserID || null;
+                    vm.item.typeID = vm.item.typeID || null;
+                    vm.item.startDate = new Date(vm.item.startDate);
+                    vm.item.endDate = new Date(vm.item.endDate);
+                    vm.item.forCareDate = new Date(vm.item.forCareDate);
+                }, function (response) {
+                    vm.content = "Something went wrong";
+                });
+        };
+
+
+        vm.save = function () {
+            if (vm.item.custID == 0 || vm.item.custID == null) {
+                vm.item.custID = custID;
+            }
+            vm.item.startDate = moment(vm.item.startDate);
+            vm.item.forCareDate = moment(vm.item.forCareDate);
+            vm.item.entDate = moment(vm.item.entDate);
+            
+            console.log(vm.item);
+            $http.post('/events/save', vm.item)
+                .then(function (response) {
+                    vm.item = response.data;
+                    //window.location.href = '/events?id=' + vm.item.id;
+                    window.location.href = '/custs?id=' + vm.item.custID;
+
+                }, function (response) {
+                    vm.content = "Something went wrong";
+                });
+        };
+    });
+</script>

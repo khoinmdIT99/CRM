@@ -1,0 +1,76 @@
+﻿@model PageModel
+@{
+    ViewData["Title"] = "Events";
+}
+
+<div ng-app="myApp" ng-controller="eventsController" ng-init="init(@Model.ToJson())">
+    <div class="d-inline">
+        <span class="h1">Events</span>
+        @*<a class="float-right" href="events?id=0">Add</a>*@
+    </div>
+
+    <div class="mt-5">
+        <div class="alert alert-secondary" role="alert" ng-if="!items.length">
+            there is no events
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover" ng-if="items.length">
+                <thead>
+                    <tr>
+                        <th scope="col">Type</th>
+                        <th scope="col">Start</th>
+                        <th scope="col">End</th>
+                        <th scope="col">Contact</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="item in items">
+                        <td><a ng-href="/events?id={{item.id}}">{{item.typeName}}</a></td>
+                        <td>{{item.startDateFormat}}</td>
+                        <td>{{item.endDateFormat}}</td>
+                        <td>{{item.contactName}}</td>
+                        <td><i class="fa fa-trash fa-lg" ng-click="delete(item.id)"></i> </td>
+
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    var app = angular.module('myApp', []);
+    app.controller('eventsController', function ($scope, $http) {
+        vm = $scope;
+        vm.init = function (opts) {
+            console.log(opts);
+            vm.selects = opts.Selects;
+            $http.get('/events/all')
+                .then(function (response) {
+                    vm.items = response.data;
+                    _.each(vm.items, function (item) {
+                        item.contactName = _.findWhere(vm.selects.contacts, { ID: item.contactID }).Name;
+                        item.typeName = _.findWhere(vm.selects.types, { ID: item.typeID }).Name;
+                        item.endDateFormat = moment(item.endDate).format('DD MMM YYYY');
+                        item.startDateFormat = moment(item.startDate).format('DD MMM YYYY');
+                    });
+                }, function (response) {
+                    vm.content = "Something went wrong";
+                });
+        };
+
+        vm.delete = function (id) {
+            if (confirm("Are you sure?")) {
+                $http.delete('/events/' + id)
+                    .then(function (response) {
+                        vm.init();
+                    }, function (response) {
+                        vm.content = "Something went wrong";
+                    });
+            }
+
+        };
+    });
+</script>

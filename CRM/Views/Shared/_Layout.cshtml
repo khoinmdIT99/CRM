@@ -1,0 +1,83 @@
+﻿@using CRM.Services
+@inject IMyService MyService
+@{ 
+   var My = (MyService)MyService;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.12/angular-material.min.css">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.12/angular-material.min.js"></script>
+
+
+    <title>@ViewData["Title"] - CRM</title>
+    <link rel="stylesheet" href="~/lib/font-awesome-4.7.0/css/font-awesome.min.css">
+    <link href="~/css/site.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.14.1/moment.min.js"></script>
+
+</head>
+
+<body ng-app="myApp" ng-cloak>
+    @if (My.User == null)
+    {
+        <nav class="navbar navbar-expand-lg navbar-light bg-light" style="margin-bottom:3%; padding-left:4%;">
+            <a asp-area="" asp-controller="Events" asp-action="Events" class="navbar-brand"><h2>CRM</h2></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    @*<li class="nav-item active">
+                        <a asp-area="" asp-controller="Home" class="nav-link" asp-action="Index"><h4>Home</h4></a>
+                    </li>*@
+                    <li class="nav-item">
+                        <a asp-area="" asp-controller="Custs" class="nav-link" asp-action="Custs"><h4>Customers</h4></a>
+                    </li>
+                    <li class="nav-item">
+                        <a asp-area="" asp-controller="Events" class="nav-link" asp-action="Events"><h4>Events</h4></a>
+                    </li>
+                    <li class="nav-item">
+                        <a asp-area="" asp-controller="Contacts" class="nav-link" asp-action="Contacts"><h4>Contacts</h4></a>
+                    </li>
+                    @*<li class="nav-item">
+                        <a asp-area="" asp-controller="Users" class="nav-link" asp-action="Users"><h4>Users</h4></a>
+                    </li>*@
+
+                </ul>
+            </div>
+        </nav>
+
+    }
+    <div class="container body-content " style="margin-top:3%; padding-left:4%;">
+
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; 2019 - CRM</p>
+        </footer>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-animate.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-aria.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-messages.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+
+
+    @*<script type="text/javascript" src="~/lib/underscore.js"></script>*@
+
+    <environment exclude="Development">
+        <script src="~/js/site.min.js" asp-append-version="true"></script>
+    </environment>
+
+    @RenderSection("Scripts", required: false)
+</body>
+
+</html>

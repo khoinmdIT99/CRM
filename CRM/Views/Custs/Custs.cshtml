@@ -1,0 +1,83 @@
+﻿@model PageModel
+@{
+    ViewData["Title"] = "Custs";
+}
+
+<div ng-app="myApp" ng-controller="custsController" ng-init="init(@Model.ToJson())">
+    <div class="d-inline">
+        <span class="h1">Custs</span>
+        <a class="float-right" href="custs?id=0">Add</a>
+    </div>
+
+    @*<p>Name : <input type="text" ng-model="name"></p>
+        <h1>Hello {{name}}</h1>*@
+    <div class="mt-5">
+        <div class="alert alert-secondary" role="alert" ng-if="!items.length">
+            there is no custs
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover" ng-if="items.length">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Mobile</th>
+                        <th scope="col">Address</th>
+                        <th scope="col">Industry</th>
+                        <th scope="col">Status</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="item in items">
+                        <td>{{item.id}}</td>
+                        <td><a ng-href="/custs?id={{item.id}}">{{item.name}}</a></td>
+                        <td>{{item.email}}</td>
+                        <td>{{item.mobile}}</td>
+                        <td> {{item.cityName}} , {{item.address}}</td>
+                        <td>{{item.industryName}}</td>
+                        <td>{{item.statusID}}</td>
+                        <td><i class="fa fa-trash fa-lg" ng-click="delete(item.id)"></i> </td>
+
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    var app = angular.module('myApp',[]);
+    app.controller('custsController', function ($scope, $http) {
+        vm = $scope;
+        vm.init = function (opts) {
+            console.log(opts);
+            vm.selects = opts.Selects;
+            $http.get('/custs/all')
+                .then(function (response) {
+                    vm.items = response.data;
+                    _.each(vm.items, function (item) {
+                        item.industryName = _.findWhere(vm.selects.industries, { ID: item.industry }).Name;
+                        item.cityName = _.findWhere(vm.selects.cities, { ID: item.cityID }).Name;
+                    });
+
+                }, function (response) {
+                    vm.content = "Something went wrong";
+                });
+        };
+
+        vm.delete = function (id) {
+            if (confirm("Are you sure?")) {
+                $http.delete('/custs/' + id)
+                    .then(function (response) {
+                        vm.init();
+                    }, function (response) {
+                        vm.content = "Something went wrong";
+                    });
+            }
+
+        };
+    });
+</script>

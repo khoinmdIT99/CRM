@@ -1,0 +1,118 @@
+﻿@model PageModel
+@{
+    ViewData["Title"] = "Contact";
+
+}
+
+<div ng-app="myApp" ng-controller="contactController" ng-init="init(@Model.ToJson())">
+    <div class="d-inline ">
+        <span ng-hide="item.id > 0" class="h1">New Contact</span>
+        <span ng-show="item.id > 0" class="h1">{{item.name}}</span>
+        @*<button class="float-right" ng-click="save()">Save</button>*@
+    </div>
+    <div class="mt-5">
+        <form ng-submit="save()" name="contactForm" novalidate>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label>Full Name</label>
+                    <input type="text" ng-model="item.name" name="name" class="form-control" maxlength="50" required>
+                    <p class="error-msg" ng-if="contactForm.name.$error.required && contactForm.name.$touched">The contact's name is required</p>
+                    <p class="error-msg" ng-if="contactForm.name.$error.maxlength">The contact's name must be less then 50 letters</p>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>Email</label>
+                    <input type="email" name="email" ng-model="item.email" class="form-control" id="inputEmail4" required>
+                    <p class="error-msg" ng-if="contactForm.email.$error.required && contactForm.email.$touched">The contact's email is required</p>
+                    <p class="error-msg" ng-if="contactForm.email.$error.email">Invalid email</p>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label>Position</label>
+                    <select class="form-control" name="position" ng-model="item.positionID" ng-options="+(opt.ID) as opt.Name for opt in selects.positions " required>
+                        <option value="">[Select]</option>
+                    </select>
+                    <p class="error-msg" ng-if="contactForm.position.$error.required && contactForm.position.$touched">The contact's position is required</p>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>Mobile</label>
+                    <input type="text" ng-model="item.mobile" class="form-control">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label>Phone 1</label>
+                    <input type="text" ng-model="item.phone1" name="phone1" class="form-control" pattern="\d{3}[\-]\d{3}[\-]\d{4}">
+                    <p class="error-msg" ng-if="contactForm.phone1.$error.pattern">The contact's address must be less then 50 letters</p>
+                </div>
+                <div class="form-group col-md-4">
+                    <label>Phone 2</label>
+                    <input type="text" ng-model="item.phone2" class="form-control">
+                </div>
+                <div class="form-group col-md-4">
+                    <label>Fax</label>
+                    <input type="text" ng-model="item.fax" class="form-control">
+                </div>
+            </div>
+
+            @*<div class="form-group">
+                <div class="form-check">
+                    <input ng-model="item.statusID" class="form-check-input" type="checkbox" id="gridCheck">
+                    <label class="form-check-label" for="gridCheck">
+                        Active
+                    </label>
+                </div>
+            </div>*@
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    <label>Remarks</label>
+                    <textarea ng-model="item.remarks" class="form-control"></textarea>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary" ng-disabled="contactForm.$invalid">Save</button>
+        </form>
+
+    </div>
+
+
+</div>
+
+<script>
+
+    var app = angular.module('myApp', []);
+    app.controller('contactController', function ($scope, $http) {
+        vm = $scope;
+        vm.changedIndustries = [];
+        var custID;
+        vm.init = function (opts) {
+            console.log(opts);
+            vm.selects = opts.Selects;
+            if (opts.Temp !== null)
+                custID = opts.Temp;
+            vm.changedIndustries = vm.selects.industries;
+            $http.get('/contacts/' + opts.Item)
+                .then(function (response) {
+                    vm.item = response.data;
+                    vm.item.positionID = vm.item.positionID || null;
+                }, function (response) {
+                    vm.content = "Something went wrong";
+                });
+        };
+
+
+        vm.save = function () {
+            if (vm.item.custID == 0 || vm.item.custID == null) {
+                vm.item.custID = custID;
+            }
+            $http.post('/contacts/save', vm.item)
+                .then(function (response) {
+                    vm.item = response.data;
+                    //window.location.href = '/contacts?id=' + vm.item.id;
+                    window.location.href = '/custs?id=' + vm.item.custID;
+
+                }, function (response) {
+                    vm.content = "Something went wrong";
+                });
+        };
+    });
+</script>

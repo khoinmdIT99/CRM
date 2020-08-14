@@ -1,0 +1,237 @@
+﻿@model PageModel
+@{
+    ViewData["Title"] = "Custs";
+
+}
+
+<div ng-app="myApp" ng-controller="custController" ng-init="init(@Model.ToJson())">
+    <div class="d-inline ">
+        <span ng-hide="item.id > 0" class="h1">New Cust</span>
+        <span ng-show="item.id > 0" class="h1">{{item.name}}</span>
+        <a ng-if="item.id > 0" class="btn btn-info float-right ml-2" ng-href="{{'/contacts?id=0&custID=' + item.id}}">Add Contact</a>
+        <a ng-if="item.id > 0" class="btn btn-warning float-right" ng-href="{{'/events?id=0&custID=' + item.id}}">Add Event</a>
+
+    </div>
+    <div class="mt-5">
+        <form ng-submit="save()" name="custForm" novalidate>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label>Full Name</label>
+                    <input type="text" ng-model="item.name" name="name" class="form-control" maxlength="50" placeholder="Name" required>
+                    <p class="error-msg" ng-if="custForm.name.$error.required && custForm.name.$touched">The cust's name is required</p>
+                    <p class="error-msg" ng-if="custForm.name.$error.maxlength">The cust's name must be less then 50 letters</p>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>Email</label>
+                    <input type="email" name="email" ng-model="item.email" class="form-control" id="inputEmail4" placeholder="Email" required>
+                    <p class="error-msg" ng-if="custForm.email.$error.required && custForm.email.$touched">The cust's email is required</p>
+                    <p class="error-msg" ng-if="custForm.email.$error.email">Invalid email</p>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label>City</label>
+                    <select class="form-control" name="city" ng-model="item.cityID" ng-options="+(opt.ID) as opt.Name for opt in selects.cities " required>
+                        <option value="">[Select]</option>
+                    </select>
+                    <p class="error-msg" ng-if="custForm.city.$error.required && custForm.city.$touched">The cust's city is required</p>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>Address</label>
+                    <input type="text" name="address" ng-model="item.address" class="form-control" maxlength="50" placeholder="Address" required>
+                    <p class="error-msg" ng-if="custForm.address.$error.required && custForm.address.$touched">The cust's address is required</p>
+                    <p class="error-msg" ng-if="custForm.address.$error.maxlength">The cust's address must be less then 50 letters</p>
+
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label>Mobile</label>
+                    <input type="text" ng-model="item.mobile" class="form-control" placeholder="Mobile">
+                </div>
+                <div class="form-group col-md-4">
+                    <label>Phone</label>
+                    <input type="text" ng-model="item.phone" name="phone" class="form-control" pattern="\d{3}[\-]\d{3}[\-]\d{4}" placeholder="Phone">
+                    <p class="error-msg" ng-if="custForm.phone.$error.pattern">The cust's address must be less then 50 letters</p>
+
+                </div>
+                <div class="form-group col-md-4">
+                    <label>Fax</label>
+                    <input type="text" ng-model="item.fax" class="form-control" placeholder="Fax">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label>MainIndustryID</label>
+                    <select class="form-control" ng-change="changeMain(item.mainIndustryID)" name="mainIndustry" ng-model="item.mainIndustryID" ng-options="+(opt.ID) as opt.Name for opt in selects.mainIndustries " required>
+                        <option value="">[Select]</option>
+                    </select>
+                    <p class="error-msg" ng-if="custForm.mainIndustry.$error.required && custForm.mainIndustry.$touched">The cust's main industry is required</p>
+                </div>
+                <div class="form-group col-md-6" ng-show="item.mainIndustryID">
+                    <label>Industry</label>
+                    <select class="form-control" name="industry" ng-model="item.industry" ng-options="+(opt.ID) as opt.Name for opt in changedIndustries" ng-required="item.mainIndustryID">
+                        <option value="">[Select]</option>
+                    </select>
+                    <p class="error-msg" ng-if="custForm.industry.$error.required && custForm.industry.$touched">The cust's industry is required</p>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    <label>Website</label>
+                    <input type="text" ng-model="item.website" class="form-control" placeholder="Website">
+                </div>
+            </div>
+            @*<div class="form-group">
+                <div class="form-check">
+                    <input ng-model="item.statusID" class="form-check-input" type="checkbox" id="gridCheck">
+                    <label class="form-check-label" for="gridCheck">
+                        Active
+                    </label>
+                </div>
+            </div>*@
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    <label>Description</label>
+                    <textarea ng-model="item.description" class="form-control"></textarea>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary" ng-disabled="custForm.$invalid">Save</button>
+        </form>
+    </div>
+    <div class="mt-5">
+        <h3>Contact List</h3>
+        <div class="alert alert-secondary" role="alert" ng-if="!item.contacts.length">
+            there is no contacts for this cust
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover" ng-if="item.contacts.length">
+                <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Position</th>
+                        <th scope="col">Phone</th>
+                        <th scope="col">Mobile</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="contact in item.contacts">
+                        <td><a ng-href="/contacts?id={{contact.id}}">{{contact.name}}</a></td>
+                        <td>{{contact.email}}</td>
+                        <td>{{contact.positionName}}</td>
+                        <td>{{contact.phone1}}  {{contact.phone2}}</td>
+                        <td>{{contact.mobile}}</td>
+                        <td><i class="fa fa-trash fa-lg" ng-click="deleteContact(contact.id)"></i> </td>
+
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <div class="mt-5">
+        <h3>Event List</h3>
+        <div class="alert alert-secondary" role="alert" ng-if="!item.events.length">
+            there is no contacts for this cust
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover" ng-if="item.events.length">
+                <thead>
+                    <tr>
+                        <th scope="col">Type</th>
+                        <th scope="col">Start</th>
+                        <th scope="col">End</th>
+                        <th scope="col">Contact</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="event in item.events">
+                        <td><a ng-href="/events?id={{event.id}}">{{event.typeName}}</a></td>
+                        <td>{{event.startDateFormat}}</td>
+                        <td>{{event.endDateFormat}}</td>
+                        <td>{{event.contactName}}</td>
+                        <td><i class="fa fa-trash fa-lg" ng-click="deleteEvent(event.id)"></i> </td>
+
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+<script>
+    var app = angular.module('myApp',  ['ngMaterial', 'ngMessages']);
+    app.controller('custController', function ($scope, $http) {
+        vm = $scope;
+        vm.changedIndustries = [];
+        vm.init = function (opts) {
+            console.log(opts);
+            vm.selects = opts.Selects;
+            vm.id = opts.Item;
+            vm.changedIndustries = vm.selects.industries;
+            $http.get('/custs/' + opts.Item)
+                .then(function (response) {
+                    vm.item = response.data;
+                    vm.item.cityID = vm.item.cityID || null;
+                    vm.item.mainIndustryID = vm.item.mainIndustryID || null;
+                    vm.item.industry = vm.item.industry || null;
+
+                    _.each(vm.item.contacts, function (c) {
+                        c.positionName = _.findWhere(vm.selects.positions, { ID: c.positionID }).Name;
+                    });
+                    _.each(vm.item.events, function (e) {
+                        e.contactName = _.findWhere(vm.selects.contacts, { ID: e.contactID }).Name;
+                        e.typeName = _.findWhere(vm.selects.types, { ID: e.typeID }).Name;
+                        e.userName = _.findWhere(vm.selects.users, { ID: e.userID }).Name;
+                        e.endDateFormat = moment(e.endDate).format('DD MMM YYYY');
+                        e.startDateFormat = moment(e.startDate).format('DD MMM YYYY');
+                    });
+                }, function (response) {
+                    vm.content = "Something went wrong";
+                });
+        };
+
+        vm.changeMain = function (main) {
+            vm.changedIndustries = vm.selects.industries.filter(function (x) {
+                return (x.Extra == main);
+            });
+        }
+
+        vm.save = function () {
+            $http.post('/custs/save', vm.item)
+                .then(function (response) {
+                    vm.item = response.data;
+                    window.location.href = '/custs?id=' + vm.item.id;
+                    //window.location.href = '/custs';
+
+                }, function (response) {
+                    vm.content = "Something went wrong";
+                });
+        };
+
+        vm.deleteContact = function (contactID) {
+            if (confirm("Are you sure?")) {
+                $http.delete('/contacts/' + contactID)
+                    .then(function (response) {
+                    window.location.href = '/custs?id=' + vm.id;
+                    }, function (response) {
+                        vm.content = "Something went wrong";
+                    });
+            }
+        }
+        vm.deleteEvent = function (eventID) {
+            if (confirm("Are you sure?")) {
+                $http.delete('/events/' + eventID)
+                    .then(function (response) {
+                        window.location.href = '/custs?id=' + vm.id;
+                    }, function (response) {
+                        vm.content = "Something went wrong";
+                    });
+            }
+        }
+    });
+</script>
